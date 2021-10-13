@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrostUI FileInput Events</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui.css">
+    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui-bundle.js"></script>
+    <script src="../dist/frost-ui-fileinput.js"></script>
+</head>
+
+<body>
+    <div class="container pt-5">
+        <div class="mb-4">
+            <div class="card mb-2">
+                <div class="card-body py-0 px-2 overflow-auto" id="events" style="height: 100px;"></div>
+            </div>
+            <label for="fileEvents">Default</label>
+            <input id="fileEvents" type="file" />
+        </div>
+    </div>
+    <script>
+        const fileEvents = dom.findOne('#fileEvents');
+        const events = dom.findOne('#events');
+
+        UI.FileInput.init(fileEvents, {
+            removeCallback() {
+                return new Promise((resolve, reject) => {
+                    setTimeout(resolve, 1000);
+                });
+            }
+        });
+
+        dom.addEvent(fileEvents, 'change.ui.fileinput', e => {
+            const div = dom.create('div', {
+                html: `<small>"${e.type}" event triggered</small>`
+            });
+            dom.append(events, div);
+
+            const scrollHeight = dom.height(events, DOM.SCROLL_BOX);
+            dom.setScrollY(events, scrollHeight);
+        });
+    </script>
+</body>
+
+</html>

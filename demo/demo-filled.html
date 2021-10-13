@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrostUI FileInput</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui.css">
+    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui-bundle.js"></script>
+    <script src="../dist/frost-ui-fileinput.js"></script>
+</head>
+
+<body>
+    <div class="container pt-5">
+        <div class="mb-4">
+            <label for="fileDefault">Default</label>
+            <input id="fileDefault" type="file" />
+        </div>
+        <div class="mb-4">
+            <label for="fileMulti">Multi</label>
+            <input id="fileMulti" type="file" multiple />
+        </div>
+        <div class="mb-4">
+            <label for="fileUpload">Upload</label>
+            <input id="fileUpload" type="file" />
+        </div>
+        <div class="mb-4">
+            <label for="fileCancel">Cancel</label>
+            <input id="fileCancel" type="file" />
+        </div>
+        <div class="mb-4">
+            <label for="fileRemove">Remove</label>
+            <input id="fileRemove" type="file" data-ui-initial-value="test.txt" />
+        </div>
+        <div class="mb-4">
+            <label for="fileProgress">No Progress</label>
+            <input id="fileProgress" type="file" data-ui-show-progress="false" />
+        </div>
+        <div class="mb-4">
+            <label for="fileStyles">Styles</label>
+            <input id="fileStyles" type="file" data-ui-browse-style="dark" data-ui-upload-style="success" data-ui-cancel-style="warning" data-ui-remove-style="danger" />
+        </div>
+        <div class="mb-4">
+            <label for="fileDisabled">Disabled</label>
+            <input id="fileDisabled" type="file" disabled />
+        </div>
+    </div>
+    <script>
+        const fileDefault = dom.findOne('#fileDefault');
+        const fileMulti = dom.findOne('#fileMulti');
+        const fileUpload = dom.findOne('#fileUpload');
+        const fileCancel = dom.findOne('#fileCancel');
+        const fileRemove = dom.findOne('#fileRemove');
+        const fileProgress = dom.findOne('#fileProgress');
+        const fileStyles = dom.findOne('#fileStyles');
+        const fileDisabled = dom.findOne('#fileDisabled');
+
+        function uploadCallback(updateProgress) {
+            return dom.animate(this._node, (_, progress) => {
+                updateProgress(progress * 100);
+            }, {
+                type: 'linear',
+                duration: 5000
+            });
+        }
+
+        function cancelCallback() {
+            dom.stop(this._node);
+        }
+
+        function removeCallback() {
+            return new Promise((resolve, reject) => {
+                setTimeout(resolve, 1000);
+            });
+        }
+
+        UI.FileInput.init(fileDefault);
+        UI.FileInput.init(fileMulti);
+        UI.FileInput.init(fileUpload, {
+            uploadCallback
+        });
+        UI.FileInput.init(fileCancel, {
+            uploadCallback,
+            cancelCallback
+        });
+        UI.FileInput.init(fileRemove, {
+            uploadCallback,
+            removeCallback
+        });
+        UI.FileInput.init(fileProgress, {
+            uploadCallback
+        });
+        UI.FileInput.init(fileStyles, {
+            uploadCallback,
+            cancelCallback,
+            removeCallback
+        });
+        UI.FileInput.init(fileDisabled);
+    </script>
+</body>
+
+</html>
