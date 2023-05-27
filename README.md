@@ -1,4 +1,4 @@
-# FrostUI Switch
+# FrostUI FileInput
 
 **FrostUI FileInput** is a free, open-source File Input component for *JavaScript*.
 
