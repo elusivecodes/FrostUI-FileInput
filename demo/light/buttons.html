@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FrostUI FileInput</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui.css">
-    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui-bundle.js"></script>
-    <script src="../dist/frost-ui-fileinput.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui.css">
+    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui-bundle.js"></script>
+    <script src="../../dist/frost-ui-fileinput.js"></script>
 </head>
 
 <body>
@@ -46,17 +46,17 @@
         </div>
     </div>
     <script>
-        const fileDefault = dom.findOne('#fileDefault');
-        const fileMulti = dom.findOne('#fileMulti');
-        const fileUpload = dom.findOne('#fileUpload');
-        const fileCancel = dom.findOne('#fileCancel');
-        const fileRemove = dom.findOne('#fileRemove');
-        const fileProgress = dom.findOne('#fileProgress');
-        const fileStyles = dom.findOne('#fileStyles');
-        const fileDisabled = dom.findOne('#fileDisabled');
+        const fileDefault = $.findOne('#fileDefault');
+        const fileMulti = $.findOne('#fileMulti');
+        const fileUpload = $.findOne('#fileUpload');
+        const fileCancel = $.findOne('#fileCancel');
+        const fileRemove = $.findOne('#fileRemove');
+        const fileProgress = $.findOne('#fileProgress');
+        const fileStyles = $.findOne('#fileStyles');
+        const fileDisabled = $.findOne('#fileDisabled');
 
         function uploadCallback(updateProgress) {
-            return dom.animate(this._node, (_, progress) => {
+            return $.animate(this._node, (_, progress) => {
                 updateProgress(progress * 100);
             }, {
                 type: 'linear',
@@ -65,7 +65,7 @@
         }
 
         function cancelCallback() {
-            dom.stop(this._node);
+            $.stop(this._node, { finish: false });
         }
 
         function removeCallback() {

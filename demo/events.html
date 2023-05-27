@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FrostUI FileInput Events</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui.css">
-    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui-bundle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui.css">
+    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui-bundle.js"></script>
     <script src="../dist/frost-ui-fileinput.js"></script>
 </head>
 
@@ -21,8 +21,8 @@
         </div>
     </div>
     <script>
-        const fileEvents = dom.findOne('#fileEvents');
-        const events = dom.findOne('#events');
+        const fileEvents = $.findOne('#fileEvents');
+        const events = $.findOne('#events');
 
         UI.FileInput.init(fileEvents, {
             removeCallback() {
@@ -32,14 +32,14 @@
             }
         });
 
-        dom.addEvent(fileEvents, 'change.ui.fileinput', e => {
-            const div = dom.create('div', {
+        $.addEvent(fileEvents, 'change.ui.fileinput', e => {
+            const div = $.create('div', {
                 html: `<small>"${e.type}" event triggered</small>`
             });
-            dom.append(events, div);
+            $.append(events, div);
 
-            const scrollHeight = dom.height(events, DOM.SCROLL_BOX);
-            dom.setScrollY(events, scrollHeight);
+            const scrollHeight = $.height(events, { boxSize: $.SCROLL_BOX });
+            $.setScrollY(events, scrollHeight);
         });
     </script>
 </body>

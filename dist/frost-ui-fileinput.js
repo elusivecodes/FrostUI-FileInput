@@ -1,60 +1,36 @@
-/**
- * FrostUI-FileInput v1.0
- * https://github.com/elusivecodes/FrostUI-FileInput
- */
-(function(global, factory) {
-    'use strict';
-
-    if (typeof module === 'object' && typeof module.exports === 'object') {
-        module.exports = factory;
-    } else {
-        factory(global);
-    }
-
-})(window, function(window) {
-    'use strict';
-
-    if (!window) {
-        throw new Error('FrostUI-FileInput requires a Window.');
-    }
-
-    if (!('UI' in window)) {
-        throw new Error('FrostUI-FileInput requires FrostUI.');
-    }
-
-    const Core = window.Core;
-    const dom = window.dom;
-    const UI = window.UI;
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@fr0st/ui'), require('@fr0st/query')) :
+    typeof define === 'function' && define.amd ? define(['exports', '@fr0st/ui', '@fr0st/query'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.UI = global.UI || {}, global.UI, global.fQuery));
+})(this, (function (exports, ui, $) { 'use strict';
 
     /**
      * FileInput Class
      * @class
      */
-    class FileInput extends UI.BaseComponent {
-
+    class FileInput extends ui.BaseComponent {
         /**
          * New FileInput constructor.
          * @param {HTMLElement} node The input node.
-         * @param {object} [settings] The options to create the FileInput with.
-         * @returns {FileInput} A new FileInput object.
+         * @param {object} [options] The options to create the FileInput with.
          */
-        constructor(node, settings) {
-            super(node, settings);
+        constructor(node, options) {
+            super(node, options);
 
-            if (!this._settings.uploadCallback) {
-                this._settings.showUpload = false;
+            if (!this._options.uploadCallback) {
+                this._options.showUpload = false;
             }
 
-            if (!this._settings.cancelCallback) {
-                this._settings.showCancel = false;
+            if (!this._options.cancelCallback) {
+                this._options.showCancel = false;
             }
 
-            if (!this._settings.removeCallback) {
-                this._settings.showRemove = false;
+            if (!this._options.removeCallback) {
+                this._options.showRemove = false;
             }
 
-            if (this._settings.initialValue) {
-                this._fileList = Core.wrap(this._settings.initialValue);
+            if (this._options.initialValue) {
+                this._fileList = $._wrap(this._options.initialValue);
             } else {
                 this._fileList = [];
             }
@@ -67,27 +43,29 @@
         }
 
         /**
+         * Clear the FileInput.
+         */
+        clear() {
+            $.setValue(this._node, null);
+            this._refresh();
+        }
+
+        /**
          * Disable the FileInput.
-         * @returns {FileInput} The FileInput.
          */
         disable() {
-            dom.setAttribute(this._node, 'disabled', true);
-
+            $.setAttribute(this._node, { disabled: true });
             this._refreshDisabled();
-
-            return this;
         }
 
         /**
          * Dispose the FileInput.
          */
         dispose() {
-            dom.remove(this._container);
-            dom.removeEvent(this._node, 'change.ui.fileinput');
-            dom.removeEvent(this._node, 'change.ui.fileinput');
-            dom.removeEvent(this._node, 'change.ui.fileinput');
-            dom.removeAttribute(this._node, 'tabindex');
-            dom.removeClass(this._node, this.constructor.classes.hide);
+            $.remove(this._container);
+            $.removeEvent(this._node, 'change.ui.fileinput');
+            $.removeAttribute(this._node, 'tabindex');
+            $.removeClass(this._node, this.constructor.classes.hide);
 
             this._container = null;
             this._group = null;
@@ -106,22 +84,18 @@
 
         /**
          * Enable the FileInput.
-         * @returns {FileInput} The FileInput.
          */
         enable() {
-            dom.removeAttribute(this._node, 'disabled');
-
+            $.removeAttribute(this._node, 'disabled');
             this._refreshDisabled();
-
-            return this;
         }
 
         /**
          * Get the files.
-         * @returns {Array} The files.
+         * @return {Array} The files.
          */
         getFiles() {
-            const files = dom.getProperty(this._node, 'files');
+            const files = $.getProperty(this._node, 'files');
 
             const results = [];
 
@@ -132,413 +106,366 @@
             return results;
         }
 
-
-    }
-
-
-    /**
-     * FileInput Events
-     */
-
-    Object.assign(FileInput.prototype, {
-
-        /**
-         * Attach events for the FileInput.
-         */
-        _events() {
-            dom.addEvent(this._node, 'change.ui.fileinput', _ => {
-                this._refresh();
-            });
-
-            dom.addEvent(this._container, 'dragover.ui.fileinput', e => {
-                e.preventDefault();
-            });
-
-            dom.addEvent(this._container, 'drop.ui.fileinput', e => {
-                e.preventDefault();
-
-                dom.setProperty(this._node, 'files', e.dataTransfer.files);
-
-                this._refresh();
-            });
-
-            dom.addEvent(this._input, 'focus.ui.fileinput', _ => {
-                dom.blur(this._input);
-            });
-
-            dom.addEvent(this._input, 'click.ui.fileinput', _ => {
-                dom.click(this._node);
-            });
-
-            if (this._uploadButton) {
-                const uploadCallback = this._settings.uploadCallback.bind(this);
-                const updateProgress = progress => {
-                    progress = Math.round(progress);
-
-                    if (this._progressBar) {
-                        dom.setText(this._progressBar, `${progress}%`);
-                        dom.setStyle(this._progressBar, 'width', `${progress}%`);
-                    }
-                };
-
-                dom.addEvent(this._uploadButton, 'click.ui.fileinput', _ => {
-                    this._startLoading(this._uploadButton);
-
-                    if (this._cancelButton) {
-                        dom.append(this._group, this._cancelButton);
-                    }
-
-                    if (this._progress) {
-                        dom.append(this._container, this._progress);
-                    }
-
-                    if (this._progressBar) {
-                        dom.removeClass(this._progressBar, [this.constructor.classes.progressSuccess, this.constructor.classes.progressError]);
-                    }
-
-                    Promise.resolve(uploadCallback(updateProgress)).then(_ => {
-                        this._fileList = this._getFileNames();
-
-                        dom.setValue(this._node, '');
-
-                        dom.triggerEvent(this._node, 'change.ui.fileinput');
-
-                        dom.detach(this._uploadButton);
-
-                        if (this._progressBar) {
-                            dom.setText(this._progressBar, this.constructor.lang.uploadSuccess);
-                            dom.addClass(this._progressBar, this.constructor.classes.progressSuccess);
-                        }
-                    }).catch(_ => {
-                        if (this._progressBar) {
-                            dom.setText(this._progressBar, this.constructor.lang.uploadFail);
-                            dom.addClass(this._progressBar, this.constructor.classes.progressError);
-                        }
-                    }).finally(_ => {
-                        this._endLoading();
-
-                        if (this._progressBar) {
-                            dom.setStyle(this._progressBar, 'width', '100%');
-                        }
-                    });
-                });
-            }
-
-            if (this._cancelButton) {
-                const cancelCallback = this._settings.cancelCallback.bind(this);
-                dom.addEvent(this._cancelButton, 'click.ui.fileinput', _ => {
-                    this._startLoading(this._cancelButton);
-
-                    Promise.resolve(cancelCallback()).then(_ => {
-                        if (this._progressBar) {
-                            dom.setStyle(this._progressBar, 'width', `0%`);
-                        }
-                    }).finally(_ => {
-                        this._endLoading();
-
-                        if (this._progress) {
-                            dom.detach(this._progress);
-                        }
-                    });
-                });
-            }
-
-            if (this._removeButton) {
-                const removeCallback = this._settings.removeCallback.bind(this);
-                dom.addEvent(this._removeButton, 'click.ui.fileinput', _ => {
-                    this._startLoading(this._removeButton);
-
-                    Promise.resolve(removeCallback()).then(_ => {
-                        this._fileList = [];
-
-                        if (dom.getProperty(this._node, 'files')) {
-                            dom.setValue(this._node, '');
-
-                            dom.triggerEvent(this._node, 'change.ui.fileinput');
-                        }
-                    }).finally(_ => {
-                        this._endLoading();
-
-                        if (this._progress) {
-                            dom.detach(this._progress);
-                        }
-                    });
-                });
-            }
-
-            if (this._browseButton) {
-                dom.addEvent(this._browseButton, 'click.ui.fileinput', _ => {
-                    dom.click(this._node);
-                });
-            }
-        }
-
-    });
-
-
-    /**
-     * FileInput Helpers
-     */
-
-    Object.assign(FileInput.prototype, {
-
-        /**
-         * End loading.
-         */
-        _endLoading() {
-            dom.removeAttribute(this._node, 'disabled');
-
-            const buttons = this._getButtons();
-
-            for (const button of buttons) {
-                if (!dom.hasDataset(button, 'uiContent')) {
-                    continue;
-                }
-
-                dom.removeAttribute(button, 'disabled');
-                const content = dom.getDataset(button, 'uiContent');
-                dom.setHTML(button, content);
-                dom.append(this._group, button);
-            }
-
-            this._refresh();
-        },
-
-        /**
-         * Get the buttons.
-         * @returns {Array} The buttons.
-         */
-        _getButtons() {
-            return [this._uploadButton, this._cancelButton, this._removeButton, this._browseButton].filter(a => a);
-        },
-
-        /**
-         * Get the file names.
-         * @returns {Array} The file names.
-         */
-        _getFileNames() {
-            return this.getFiles()
-                .map(file => file.name);
-        },
-
-        /**
-         * Refresh the disabled styling.
-         */
-        _refreshDisabled() {
-            const nodes = this._getButtons();
-
-            if (this._input) {
-                nodes.push(this._input);
-            }
-
-            if (dom.is(this._node, ':disabled')) {
-                dom.setAttribute(nodes, 'disabled', true);
-            } else {
-                dom.removeAttribute(nodes, 'disabled');
-            }
-        },
-
-        /**
-         * Start loading.
-         * @param {HTMLElement} button The active button.
-         */
-        _startLoading(button) {
-            if (this._node) {
-                dom.setAttribute(this._node, 'disabled', true);
-            }
-
-            const buttons = this._getButtons();
-
-            dom.detach(buttons);
-
-            if (button) {
-                dom.setAttribute(button, 'disabled', true);
-                const content = dom.getHTML(button);
-                dom.setDataset(button, 'uiContent', content);
-                const spinner = dom.create('span', {
-                    class: this.constructor.classes.spinner
-                });
-                dom.empty(button);
-                dom.append(button, spinner);
-                dom.append(this._group, button);
-            }
-        }
-
-    })
-
-
-    /**
-     * FileInput Render
-     */
-
-    Object.assign(FileInput.prototype, {
-
-        /**
-         * Refresh the file input.
-         */
-        _refresh() {
-            const files = this.getFiles();
-            const hasFiles = files.length > 0;
-
-            let fileNames;
-            if (hasFiles) {
-                fileNames = this._getFileNames();
-            } else {
-                fileNames = this._fileList;
-            }
-
-            fileNames = fileNames.join(this._settings.multiSeparator);
-
-            if (this._input) {
-                dom.setValue(this._input, fileNames);
-            } else {
-                dom.setText(this._fileNames, fileNames);
-            }
-
-            if (this._uploadButton) {
-                if (hasFiles) {
-                    dom.append(this._group, this._uploadButton);
-                } else {
-                    dom.detach(this._uploadButton);
-                }
-            }
-
-            if (this._cancelButton) {
-                dom.detach(this._cancelButton);
-            }
-
-            if (this._removeButton) {
-                if (fileNames) {
-                    dom.append(this._group, this._removeButton);
-                } else {
-                    dom.detach(this._removeButton);
-                }
-            }
-
-            if (this._browseButton) {
-                dom.append(this._group, this._browseButton);
-            }
-        },
-
-        /**
-         * Render the file input.
-         */
-        _render() {
-            this._container = dom.create('div');
-
-            if (this._settings.inputStyle === 'none') {
-                this._group = dom.create('div', {
-                    class: this.constructor.classes.btnGroup
-                });
-
-                this._fileNames = dom.create('small', {
-                    class: this.constructor.classes.fileNames
-                });
-            } else {
-                this._group = dom.create('div', {
-                    class: this.constructor.classes.inputGroup
-                });
-
-                const formInput = dom.create('div', {
-                    class: this.constructor.classes.formInput
-                });
-
-                this._input = dom.create('input', {
-                    attributes: {
-                        type: 'text',
-                        placeholder: dom.is(this._node, '[multiple]') ?
-                            this.constructor.lang.selectFiles :
-                            this.constructor.lang.selectFile,
-                        tabindex: -1
-                    }
-                });
-
-                if (this._settings.inputStyle === 'filled') {
-                    dom.addClass(this._input, this.constructor.classes.inputFilled);
-                    dom.addClass(this._group, this.constructor.classes.inputGroupFilled);
-                } else {
-                    dom.addClass(this._input, this.constructor.classes.inputOutline);
-                }
-
-                dom.append(formInput, this._input);
-                dom.append(this._group, formInput);
-            }
-
-            if (this._settings.showUpload) {
-                this._uploadButton = this.constructor._renderButton(this._settings.uploadStyle, 'upload');
-            }
-
-            if (this._settings.showCancel) {
-                this._cancelButton = this.constructor._renderButton(this._settings.cancelStyle, 'cancel');
-            }
-
-            if (this._settings.showRemove) {
-                this._removeButton = this.constructor._renderButton(this._settings.removeStyle, 'remove');
-            }
-
-            if (this._settings.showBrowse) {
-                this._browseButton = this.constructor._renderButton(this._settings.browseStyle, 'browse');
-            }
-
-            dom.append(this._container, this._group);
-
-            if (this._fileNames) {
-                dom.append(this._container, this._fileNames);
-            }
-
-            dom.setAttribute(this._node, 'tabindex', '-1');
-            dom.addClass(this._node, this.constructor.classes.hide);
-            dom.before(this._node, this._container);
-
-            if (this._settings.showProgress) {
-                this._progress = dom.create('div', {
-                    class: this.constructor.classes.progress
-                });
-
-                this._progressBar = dom.create('div', {
-                    class: this.constructor.classes.progressBar
-                });
-
-                dom.append(this._progress, this._progressBar);
-            }
-        }
-
-    });
-
-
-    /**
-     * FileInput Render (Static)
-     */
-
-    Object.assign(FileInput, {
-
         /**
          * Render a button.
          * @param {string} style The button style.
          * @param {string} key The button key.
-         * @returns {HTMLElement} The button.
+         * @return {HTMLElement} The button.
          */
-        _renderButton(style, key) {
-            const button = dom.create('button', {
+        static _renderButton(style, key) {
+            const button = $.create('button', {
                 class: [this.classes.btn, `btn-${style}`],
                 text: this.lang[key],
                 attributes: {
-                    type: 'button'
-                }
+                    type: 'button',
+                },
             });
 
-            const icon = dom.create('div', {
+            const icon = $.create('div', {
                 class: this.classes.icon,
-                html: this.icons[key]
+                html: this.icons[key],
             });
 
-            dom.prepend(button, icon);
+            $.prepend(button, icon);
 
             return button;
         }
+    }
 
-    });
+    /**
+     * Attach events for the FileInput.
+     */
+    function _events() {
+        $.addEvent(this._node, 'change.ui.fileinput', (_) => {
+            this._refresh();
+        });
 
+        $.addEvent(this._container, 'dragover.ui.fileinput', (e) => {
+            e.preventDefault();
+        });
+
+        $.addEvent(this._container, 'drop.ui.fileinput', (e) => {
+            e.preventDefault();
+
+            $.setProperty(this._node, { files: e.dataTransfer.files });
+
+            this._refresh();
+        });
+
+        $.addEvent(this._input, 'focus.ui.fileinput', (_) => {
+            $.blur(this._input);
+        });
+
+        $.addEvent(this._input, 'click.ui.fileinput', (_) => {
+            $.click(this._node);
+        });
+
+        if (this._uploadButton) {
+            const uploadCallback = this._options.uploadCallback.bind(this);
+            const updateProgress = (progress) => {
+                progress = Math.round(progress);
+
+                if (this._progressBar) {
+                    $.setText(this._progressBar, `${progress}%`);
+                    $.setStyle(this._progressBar, { width: `${progress}%` });
+                }
+            };
+
+            $.addEvent(this._uploadButton, 'click.ui.fileinput', (_) => {
+                this._startLoading(this._uploadButton);
+
+                if (this._cancelButton) {
+                    $.append(this._group, this._cancelButton);
+                }
+
+                if (this._progress) {
+                    $.append(this._container, this._progress);
+                }
+
+                if (this._progressBar) {
+                    $.removeClass(this._progressBar, [this.constructor.classes.progressSuccess, this.constructor.classes.progressError]);
+                }
+
+                Promise.resolve(uploadCallback(updateProgress)).then((_) => {
+                    this._fileList = this._getFileNames();
+
+                    $.setValue(this._node, '');
+                    $.triggerEvent(this._node, 'change.ui.fileinput');
+                    $.detach(this._uploadButton);
+
+                    if (this._progressBar) {
+                        $.setText(this._progressBar, this.constructor.lang.uploadSuccess);
+                        $.addClass(this._progressBar, this.constructor.classes.progressSuccess);
+                    }
+                }).catch((_) => {
+                    if (this._progressBar) {
+                        $.setText(this._progressBar, this.constructor.lang.uploadFail);
+                        $.addClass(this._progressBar, this.constructor.classes.progressError);
+                    }
+                }).finally((_) => {
+                    this._endLoading();
+
+                    if (this._progressBar) {
+                        $.setStyle(this._progressBar, { width: '100%' });
+                    }
+                });
+            });
+        }
+
+        if (this._cancelButton) {
+            const cancelCallback = this._options.cancelCallback.bind(this);
+            $.addEvent(this._cancelButton, 'click.ui.fileinput', (_) => {
+                this._startLoading(this._cancelButton);
+
+                Promise.resolve(cancelCallback()).then((_) => {
+                    if (this._progressBar) {
+                        $.setStyle(this._progressBar, { width: `0%` });
+                    }
+                }).finally((_) => {
+                    this._endLoading();
+
+                    if (this._progress) {
+                        $.detach(this._progress);
+                    }
+                });
+            });
+        }
+
+        if (this._removeButton) {
+            const removeCallback = this._options.removeCallback.bind(this);
+            $.addEvent(this._removeButton, 'click.ui.fileinput', (_) => {
+                this._startLoading(this._removeButton);
+
+                Promise.resolve(removeCallback()).then((_) => {
+                    this._fileList = [];
+
+                    if ($.getProperty(this._node, 'files')) {
+                        $.setValue(this._node, '');
+                        $.triggerEvent(this._node, 'change.ui.fileinput');
+                    }
+                }).finally((_) => {
+                    this._endLoading();
+
+                    if (this._progress) {
+                        $.detach(this._progress);
+                    }
+                });
+            });
+        }
+
+        if (this._browseButton) {
+            $.addEvent(this._browseButton, 'click.ui.fileinput', (_) => {
+                $.click(this._node);
+            });
+        }
+    }
+
+    /**
+     * End loading.
+     */
+    function _endLoading() {
+        $.removeAttribute(this._node, 'disabled');
+
+        const buttons = this._getButtons();
+
+        for (const button of buttons) {
+            if (!$.hasDataset(button, 'uiContent')) {
+                continue;
+            }
+
+            $.removeAttribute(button, 'disabled');
+            const content = $.getDataset(button, 'uiContent');
+            $.setHTML(button, content);
+            $.append(this._group, button);
+        }
+
+        this._refresh();
+    }
+    /**
+     * Get the buttons.
+     * @return {Array} The buttons.
+     */
+    function _getButtons() {
+        return [this._uploadButton, this._cancelButton, this._removeButton, this._browseButton].filter((a) => a);
+    }
+    /**
+     * Get the file names.
+     * @return {Array} The file names.
+     */
+    function _getFileNames() {
+        return this.getFiles()
+            .map((file) => file.name);
+    }
+    /**
+     * Refresh the file input.
+     */
+    function _refresh() {
+        const files = this.getFiles();
+        const hasFiles = files.length > 0;
+
+        let fileNames;
+        if (hasFiles) {
+            fileNames = this._getFileNames();
+        } else {
+            fileNames = this._fileList;
+        }
+
+        fileNames = fileNames.join(this._options.multiSeparator);
+
+        if (this._input) {
+            $.setValue(this._input, fileNames);
+        } else {
+            $.setText(this._fileNames, fileNames);
+        }
+
+        if (this._uploadButton) {
+            if (hasFiles) {
+                $.append(this._group, this._uploadButton);
+            } else {
+                $.detach(this._uploadButton);
+            }
+        }
+
+        if (this._cancelButton) {
+            $.detach(this._cancelButton);
+        }
+
+        if (this._removeButton) {
+            if (fileNames) {
+                $.append(this._group, this._removeButton);
+            } else {
+                $.detach(this._removeButton);
+            }
+        }
+
+        if (this._browseButton) {
+            $.append(this._group, this._browseButton);
+        }
+    }
+    /**
+     * Refresh the disabled styling.
+     */
+    function _refreshDisabled() {
+        const nodes = this._getButtons();
+
+        if (this._input) {
+            nodes.push(this._input);
+        }
+
+        if ($.is(this._node, ':disabled')) {
+            $.setAttribute(nodes, { disabled: true });
+        } else {
+            $.removeAttribute(nodes, 'disabled');
+        }
+    }
+    /**
+     * Start loading.
+     * @param {HTMLElement} button The active button.
+     */
+    function _startLoading(button) {
+        if (this._node) {
+            $.setAttribute(this._node, { disabled: true });
+        }
+
+        const buttons = this._getButtons();
+
+        $.detach(buttons);
+
+        if (button) {
+            $.setAttribute(button, { disabled: true });
+            const content = $.getHTML(button);
+            $.setDataset(button, { uiContent: content });
+            const spinner = $.create('span', {
+                class: this.constructor.classes.spinner,
+            });
+            $.empty(button);
+            $.append(button, spinner);
+            $.append(this._group, button);
+        }
+    }
+
+    /**
+     * Render the file input.
+     */
+    function _render() {
+        this._container = $.create('div');
+
+        if (this._options.inputStyle === 'none') {
+            this._group = $.create('div', {
+                class: this.constructor.classes.btnGroup,
+            });
+
+            this._fileNames = $.create('small', {
+                class: this.constructor.classes.fileNames,
+            });
+        } else {
+            this._group = $.create('div', {
+                class: this.constructor.classes.inputGroup,
+            });
+
+            const formInput = $.create('div', {
+                class: this.constructor.classes.formInput,
+            });
+
+            this._input = $.create('input', {
+                attributes: {
+                    type: 'text',
+                    placeholder: $.is(this._node, '[multiple]') ?
+                        this.constructor.lang.selectFiles :
+                        this.constructor.lang.selectFile,
+                    tabindex: -1,
+                },
+            });
+
+            if (this._options.inputStyle === 'filled') {
+                $.addClass(this._input, this.constructor.classes.inputFilled);
+                $.addClass(this._group, this.constructor.classes.inputGroupFilled);
+            } else {
+                $.addClass(this._input, this.constructor.classes.inputOutline);
+            }
+
+            $.append(formInput, this._input);
+            $.append(this._group, formInput);
+        }
+
+        if (this._options.showUpload) {
+            this._uploadButton = this.constructor._renderButton(this._options.uploadStyle, 'upload');
+        }
+
+        if (this._options.showCancel) {
+            this._cancelButton = this.constructor._renderButton(this._options.cancelStyle, 'cancel');
+        }
+
+        if (this._options.showRemove) {
+            this._removeButton = this.constructor._renderButton(this._options.removeStyle, 'remove');
+        }
+
+        if (this._options.showBrowse) {
+            this._browseButton = this.constructor._renderButton(this._options.browseStyle, 'browse');
+        }
+
+        $.append(this._container, this._group);
+
+        if (this._fileNames) {
+            $.append(this._container, this._fileNames);
+        }
+
+        if (this._options.showProgress) {
+            this._progress = $.create('div', {
+                class: this.constructor.classes.progress,
+            });
+
+            this._progressBar = $.create('div', {
+                class: this.constructor.classes.progressBar,
+            });
+
+            $.append(this._progress, this._progressBar);
+        }
+
+        $.setAttribute(this._node, { tabindex: -1 });
+        $.addClass(this._node, this.constructor.classes.hide);
+        $.before(this._node, this._container);
+    }
 
     // FileInput default options
     FileInput.defaults = {
@@ -547,7 +474,7 @@
         removeCallback: null,
         initialValue: null,
         inputStyle: 'filled',
-        browseStyle: 'light',
+        browseStyle: 'secondary',
         removeStyle: 'light',
         uploadStyle: 'primary',
         cancelStyle: 'danger',
@@ -556,7 +483,7 @@
         showUpload: true,
         showCancel: true,
         showRemove: true,
-        showProgress: true
+        showProgress: true,
     };
 
     // FileInput classes
@@ -575,7 +502,7 @@
         progressBar: 'progress-bar',
         progressError: 'bg-danger',
         progressSuccess: 'bg-success',
-        spinner: 'spinner-border spinner-border-sm'
+        spinner: 'spinner-border spinner-border-sm',
     };
 
     // FileInput icons
@@ -583,7 +510,7 @@
         browse: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M19 20H4a2 2 0 0 1-2-2V6c0-1.11.89-2 2-2h6l2 2h7a2 2 0 0 1 2 2H4v10l2.14-8h17.07l-2.28 8.5c-.23.87-1.01 1.5-1.93 1.5z" fill="currentColor"/></svg>',
         cancel: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91z" fill="currentColor"/></svg>',
         remove: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91z" fill="currentColor"/></svg>',
-        upload: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M9 16v-6H5l7-7l7 7h-4v6H9m-4 4v-2h14v2H5z" fill="currentColor"/></svg>'
+        upload: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M9 16v-6H5l7-7l7 7h-4v6H9m-4 4v-2h14v2H5z" fill="currentColor"/></svg>',
     };
 
     // FileInput lang
@@ -595,11 +522,25 @@
         selectFile: 'Select file ...',
         upload: 'Upload',
         uploadFailed: 'Upload failed',
-        uploadSuccess: 'Upload success'
+        uploadSuccess: 'Upload success',
     };
 
-    UI.initComponent('fileinput', FileInput);
+    // FileInput prototype
+    const proto = FileInput.prototype;
 
-    UI.FileInput = FileInput;
+    proto._endLoading = _endLoading;
+    proto._events = _events;
+    proto._getButtons = _getButtons;
+    proto._getFileNames = _getFileNames;
+    proto._refresh = _refresh;
+    proto._refreshDisabled = _refreshDisabled;
+    proto._render = _render;
+    proto._startLoading = _startLoading;
 
-});
+    // FileInput init
+    ui.initComponent('fileinput', FileInput);
+
+    exports.FileInput = FileInput;
+
+}));
+//# sourceMappingURL=frost-ui-fileinput.js.map

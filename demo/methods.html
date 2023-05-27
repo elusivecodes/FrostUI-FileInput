@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FrostUI FileInput Methods</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui.css">
-    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui-bundle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui.css">
+    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui-bundle.js"></script>
     <script src="../dist/frost-ui-fileinput.js"></script>
 </head>
 
@@ -28,40 +28,46 @@
         </div>
         <div class="mt-1">
             <button class="btn btn-secondary ripple mb-0" id="fileGetFiles" type="button">Get Files</button>
+            <button class="btn btn-secondary ripple mb-0" id="fileClear" type="button">Clear</button>
         </div>
         <samp id="output"></samp>
     </div>
     <script>
-        const fileDefault = dom.findOne('#fileDefault');
-        const fileInit = dom.findOne('#fileInit');
-        const fileDispose = dom.findOne('#fileDispose');
-        const fileEnable = dom.findOne('#fileEnable');
-        const fileDisable = dom.findOne('#fileDisable');
-        const fileGetFiles = dom.findOne('#fileGetFiles');
-        const output = dom.findOne('#output');
+        const fileDefault = $.findOne('#fileDefault');
+        const fileInit = $.findOne('#fileInit');
+        const fileDispose = $.findOne('#fileDispose');
+        const fileEnable = $.findOne('#fileEnable');
+        const fileDisable = $.findOne('#fileDisable');
+        const fileGetFiles = $.findOne('#fileGetFiles');
+        const fileClear = $.findOne('#fileClear');
+        const output = $.findOne('#output');
 
-        dom.addEvent(fileInit, 'click', e => {
+        $.addEvent(fileInit, 'click', e => {
             UI.FileInput.init(fileDefault);
         });
 
-        dom.addEvent(fileDispose, 'click', e => {
+        $.addEvent(fileDispose, 'click', e => {
             UI.FileInput.init(fileDefault).dispose();
         });
 
-        dom.addEvent(fileEnable, 'click', e => {
+        $.addEvent(fileEnable, 'click', e => {
             UI.FileInput.init(fileDefault).enable();
         });
 
-        dom.addEvent(fileDisable, 'click', e => {
+        $.addEvent(fileDisable, 'click', e => {
             UI.FileInput.init(fileDefault).disable();
         });
 
-        dom.addEvent(fileGetFiles, 'click', e => {
+        $.addEvent(fileGetFiles, 'click', e => {
             const files = UI.FileInput.init(fileDefault).getFiles().map(file => file.name).join(', ');
-            dom.setText(output, `Files: ${files}`);
+            $.setText(output, `Files: ${files}`);
         });
 
-        dom.triggerEvent(fileInit, 'click');
+        $.addEvent(fileClear, 'click', e => {
+            UI.FileInput.init(fileDefault).clear();
+        });
+
+        $.triggerEvent(fileInit, 'click');
     </script>
 </body>
 

@@ -1,71 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ui-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FrostUI FileInput</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui.css">
-    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@1.4.6/dist/frost-ui-bundle.js"></script>
-    <script src="../dist/frost-ui-fileinput.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui.css">
+    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.1/dist/frost-ui-bundle.js"></script>
+    <script src="../../dist/frost-ui-fileinput.js"></script>
 </head>
 
 <body>
     <div class="container pt-5">
         <div class="mb-4">
             <label for="fileDefault">Default</label>
-            <input id="fileDefault" type="file" data-ui-input-style="outline" />
+            <input id="fileDefault" type="file" data-ui-input-style="none" />
         </div>
         <div class="mb-4">
             <label for="fileMulti">Multi</label>
-            <input id="fileMulti" type="file" data-ui-input-style="outline" multiple />
+            <input id="fileMulti" type="file" data-ui-input-style="none" multiple />
         </div>
         <div class="mb-4">
             <label for="fileUpload">Upload</label>
-            <input id="fileUpload" type="file" data-ui-input-style="outline" />
+            <input id="fileUpload" type="file" data-ui-input-style="none" />
         </div>
         <div class="mb-4">
             <label for="fileCancel">Cancel</label>
-            <input id="fileCancel" type="file" data-ui-input-style="outline" />
+            <input id="fileCancel" type="file" data-ui-input-style="none" />
         </div>
         <div class="mb-4">
             <label for="fileRemove">Remove</label>
-            <input id="fileRemove" type="file" data-ui-input-style="outline" data-ui-initial-value="test.txt" />
+            <input id="fileRemove" type="file" data-ui-input-style="none" data-ui-initial-value="test.txt" />
         </div>
         <div class="mb-4">
             <label for="fileProgress">No Progress</label>
-            <input id="fileProgress" type="file" data-ui-input-style="outline" data-ui-show-progress="false" />
+            <input id="fileProgress" type="file" data-ui-input-style="none" data-ui-show-progress="false" />
         </div>
         <div class="mb-4">
             <label for="fileStyles">Styles</label>
-            <input id="fileStyles" type="file" data-ui-input-style="outline" data-ui-browse-style="dark" data-ui-upload-style="success" data-ui-cancel-style="warning" data-ui-remove-style="danger" />
+            <input id="fileStyles" type="file" data-ui-input-style="none" data-ui-browse-style="light" data-ui-upload-style="success" data-ui-cancel-style="warning" data-ui-remove-style="danger" />
         </div>
         <div class="mb-4">
             <label for="fileDisabled">Disabled</label>
-            <input id="fileDisabled" type="file" data-ui-input-style="outline" disabled />
+            <input id="fileDisabled" type="file" data-ui-input-style="none" disabled />
         </div>
     </div>
     <script>
-        const fileDefault = dom.findOne('#fileDefault');
-        const fileMulti = dom.findOne('#fileMulti');
-        const fileUpload = dom.findOne('#fileUpload');
-        const fileCancel = dom.findOne('#fileCancel');
-        const fileRemove = dom.findOne('#fileRemove');
-        const fileProgress = dom.findOne('#fileProgress');
-        const fileStyles = dom.findOne('#fileStyles');
-        const fileDisabled = dom.findOne('#fileDisabled');
+        const fileDefault = $.findOne('#fileDefault');
+        const fileMulti = $.findOne('#fileMulti');
+        const fileUpload = $.findOne('#fileUpload');
+        const fileCancel = $.findOne('#fileCancel');
+        const fileRemove = $.findOne('#fileRemove');
+        const fileProgress = $.findOne('#fileProgress');
+        const fileStyles = $.findOne('#fileStyles');
+        const fileDisabled = $.findOne('#fileDisabled');
 
         function uploadCallback(updateProgress) {
-            return dom.animate(this._node, (_, progress) => {
+            return $.animate(this._node, (_, progress) => {
                 updateProgress(progress * 100);
             }, {
                 type: 'linear',
-                duration: 5000
+                duration: 10000
             });
         }
 
         function cancelCallback() {
-            dom.stop(this._node);
+            $.stop(this._node, { finish: false });
         }
 
         function removeCallback() {
