@@ -40,9 +40,9 @@
     "private": false,
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^15.0.2",
-        "eslint": "^8.38.0",
+        "eslint": "^8.41.0",
         "eslint-config-google": "^0.14.0",
-        "rollup": "^3.20.2",
-        "terser": "^5.16.9"
+        "rollup": "^3.23.0",
+        "terser": "^5.17.6"
     }
 }
