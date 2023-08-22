@@ -15,6 +15,7 @@ export function _endLoading() {
 
         $.removeAttribute(button, 'disabled');
         const content = $.getDataset(button, 'uiContent');
+        $.removeDataset(button, 'uiContent');
         $.setHTML(button, content);
         $.append(this._group, button);
     }
@@ -74,7 +75,7 @@ export function _refresh() {
     }
 
     if (this._removeButton) {
-        if (fileNames) {
+        if (hasFiles || (this._fileList && this._options.removeCallback)) {
             $.append(this._group, this._removeButton);
         } else {
             $.detach(this._removeButton);

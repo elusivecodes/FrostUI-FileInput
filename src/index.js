@@ -2,7 +2,7 @@ import { initComponent } from '@fr0st/ui';
 import FileInput from './file-input.js';
 import { _events } from './prototype/events.js';
 import { _endLoading, _getButtons, _getFileNames, _refresh, _refreshDisabled, _startLoading } from './prototype/helpers.js';
-import { _render } from './prototype/render.js';
+import { _render, _renderButton } from './prototype/render.js';
 
 // FileInput default options
 FileInput.defaults = {
@@ -17,10 +17,9 @@ FileInput.defaults = {
     cancelStyle: 'danger',
     multiSeparator: ', ',
     showBrowse: true,
-    showUpload: true,
-    showCancel: true,
     showRemove: true,
     showProgress: true,
+    buttonText: false,
 };
 
 // FileInput classes
@@ -30,7 +29,7 @@ FileInput.classes = {
     fileNames: 'align-middle ms-2',
     formInput: 'form-input',
     hide: 'visually-hidden',
-    icon: 'd-inline-block me-1',
+    iconText: 'd-inline-block me-1',
     inputFilled: 'input-filled',
     inputOutline: 'input-outline',
     inputGroup: 'input-group',
@@ -72,6 +71,7 @@ proto._getFileNames = _getFileNames;
 proto._refresh = _refresh;
 proto._refreshDisabled = _refreshDisabled;
 proto._render = _render;
+proto._renderButton = _renderButton;
 proto._startLoading = _startLoading;
 
 // FileInput init

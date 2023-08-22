@@ -14,18 +14,6 @@ export default class FileInput extends BaseComponent {
     constructor(node, options) {
         super(node, options);
 
-        if (!this._options.uploadCallback) {
-            this._options.showUpload = false;
-        }
-
-        if (!this._options.cancelCallback) {
-            this._options.showCancel = false;
-        }
-
-        if (!this._options.removeCallback) {
-            this._options.showRemove = false;
-        }
-
         if (this._options.initialValue) {
             this._fileList = $._wrap(this._options.initialValue);
         } else {
@@ -101,30 +89,5 @@ export default class FileInput extends BaseComponent {
         }
 
         return results;
-    }
-
-    /**
-     * Render a button.
-     * @param {string} style The button style.
-     * @param {string} key The button key.
-     * @return {HTMLElement} The button.
-     */
-    static _renderButton(style, key) {
-        const button = $.create('button', {
-            class: [this.classes.btn, `btn-${style}`],
-            text: this.lang[key],
-            attributes: {
-                type: 'button',
-            },
-        });
-
-        const icon = $.create('div', {
-            class: this.classes.icon,
-            html: this.icons[key],
-        });
-
-        $.prepend(button, icon);
-
-        return button;
     }
 }

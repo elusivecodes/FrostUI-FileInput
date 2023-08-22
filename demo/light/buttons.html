@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FrostUI FileInput</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.3/dist/frost-ui.css">
-    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@2.3.3/dist/frost-ui-bundle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@latest/dist/frost-ui.css">
+    <script src="https://cdn.jsdelivr.net/gh/elusivecodes/frostui@latest/dist/frost-ui-bundle.js"></script>
     <script src="../../dist/frost-ui-fileinput.js"></script>
 </head>
 
@@ -14,35 +14,35 @@
     <div class="container pt-5">
         <div class="mb-4">
             <label for="fileDefault">Default</label>
-            <input id="fileDefault" type="file" data-ui-input-style="none" />
+            <input id="fileDefault" type="file" data-ui-input-style="none" data-ui-button-text="true" />
         </div>
         <div class="mb-4">
             <label for="fileMulti">Multi</label>
-            <input id="fileMulti" type="file" data-ui-input-style="none" multiple />
+            <input id="fileMulti" type="file" data-ui-input-style="none" data-ui-button-text="true" multiple />
         </div>
         <div class="mb-4">
             <label for="fileUpload">Upload</label>
-            <input id="fileUpload" type="file" data-ui-input-style="none" />
+            <input id="fileUpload" type="file" data-ui-input-style="none" data-ui-button-text="true" />
         </div>
         <div class="mb-4">
             <label for="fileCancel">Cancel</label>
-            <input id="fileCancel" type="file" data-ui-input-style="none" />
+            <input id="fileCancel" type="file" data-ui-input-style="none" data-ui-button-text="true" />
         </div>
         <div class="mb-4">
             <label for="fileRemove">Remove</label>
-            <input id="fileRemove" type="file" data-ui-input-style="none" data-ui-initial-value="test.txt" />
+            <input id="fileRemove" type="file" data-ui-input-style="none" data-ui-button-text="true" data-ui-initial-value="test.txt" />
         </div>
         <div class="mb-4">
             <label for="fileProgress">No Progress</label>
-            <input id="fileProgress" type="file" data-ui-input-style="none" data-ui-show-progress="false" />
+            <input id="fileProgress" type="file" data-ui-input-style="none" data-ui-button-text="true" data-ui-show-progress="false" />
         </div>
         <div class="mb-4">
             <label for="fileStyles">Styles</label>
-            <input id="fileStyles" type="file" data-ui-input-style="none" data-ui-browse-style="dark" data-ui-upload-style="success" data-ui-cancel-style="warning" data-ui-remove-style="danger" />
+            <input id="fileStyles" type="file" data-ui-input-style="none" data-ui-button-text="true" data-ui-browse-style="dark" data-ui-upload-style="success" data-ui-cancel-style="warning" data-ui-remove-style="danger" />
         </div>
         <div class="mb-4">
             <label for="fileDisabled">Disabled</label>
-            <input id="fileDisabled" type="file" data-ui-input-style="none" disabled />
+            <input id="fileDisabled" type="file" data-ui-input-style="none" data-ui-button-text="true" disabled />
         </div>
     </div>
     <script>
@@ -57,7 +57,7 @@
 
         function uploadCallback(updateProgress) {
             return $.animate(this._node, (_, progress) => {
-                updateProgress(progress * 100);
+                updateProgress(progress);
             }, {
                 type: 'linear',
                 duration: 10000
@@ -92,8 +92,7 @@
         });
         UI.FileInput.init(fileStyles, {
             uploadCallback,
-            cancelCallback,
-            removeCallback
+            cancelCallback
         });
         UI.FileInput.init(fileDisabled);
     </script>

@@ -17,18 +17,6 @@
         constructor(node, options) {
             super(node, options);
 
-            if (!this._options.uploadCallback) {
-                this._options.showUpload = false;
-            }
-
-            if (!this._options.cancelCallback) {
-                this._options.showCancel = false;
-            }
-
-            if (!this._options.removeCallback) {
-                this._options.showRemove = false;
-            }
-
             if (this._options.initialValue) {
                 this._fileList = $._wrap(this._options.initialValue);
             } else {
@@ -105,31 +93,6 @@
 
             return results;
         }
-
-        /**
-         * Render a button.
-         * @param {string} style The button style.
-         * @param {string} key The button key.
-         * @return {HTMLElement} The button.
-         */
-        static _renderButton(style, key) {
-            const button = $.create('button', {
-                class: [this.classes.btn, `btn-${style}`],
-                text: this.lang[key],
-                attributes: {
-                    type: 'button',
-                },
-            });
-
-            const icon = $.create('div', {
-                class: this.classes.icon,
-                html: this.icons[key],
-            });
-
-            $.prepend(button, icon);
-
-            return button;
-        }
     }
 
     /**
@@ -161,13 +124,13 @@
         });
 
         if (this._uploadButton) {
-            const uploadCallback = this._options.uploadCallback.bind(this);
             const updateProgress = (progress) => {
-                progress = Math.round(progress);
+                progress = Math.round(progress * 100);
 
                 if (this._progressBar) {
                     $.setText(this._progressBar, `${progress}%`);
                     $.setStyle(this._progressBar, { width: `${progress}%` });
+                    $.setAttribute(this._progressBar, 'aria-valuenow', progress);
                 }
             };
 
@@ -184,72 +147,96 @@
 
                 if (this._progressBar) {
                     $.removeClass(this._progressBar, [this.constructor.classes.progressSuccess, this.constructor.classes.progressError]);
+                    $.setAttribute(this._progressBar, { 'aria-valuenow': 0 });
+
+                    const progressBarId = $.getAttribute(this._progressBar, 'id');
+                    $.setAttribute(this._uploadButton, { 'aria-describedby': progressBarId });
                 }
 
-                Promise.resolve(uploadCallback(updateProgress)).then((_) => {
-                    this._fileList = this._getFileNames();
+                const uploadCallback = this._options.uploadCallback.bind(this);
 
-                    $.setValue(this._node, '');
-                    $.triggerEvent(this._node, 'change.ui.fileinput');
-                    $.detach(this._uploadButton);
+                Promise.resolve(uploadCallback(updateProgress))
+                    .then((_) => {
+                        this._fileList = this._getFileNames();
 
-                    if (this._progressBar) {
-                        $.setText(this._progressBar, this.constructor.lang.uploadSuccess);
-                        $.addClass(this._progressBar, this.constructor.classes.progressSuccess);
-                    }
-                }).catch((_) => {
-                    if (this._progressBar) {
-                        $.setText(this._progressBar, this.constructor.lang.uploadFail);
-                        $.addClass(this._progressBar, this.constructor.classes.progressError);
-                    }
-                }).finally((_) => {
-                    this._endLoading();
+                        $.setValue(this._node, '');
+                        $.triggerEvent(this._node, 'change.ui.fileinput');
+                        $.detach(this._uploadButton);
 
-                    if (this._progressBar) {
-                        $.setStyle(this._progressBar, { width: '100%' });
-                    }
-                });
+                        if (this._progressBar) {
+                            $.setText(this._progressBar, this.constructor.lang.uploadSuccess);
+                            $.addClass(this._progressBar, this.constructor.classes.progressSuccess);
+                            $.removeAttribute(this._uploadButton, 'aria-describedby');
+                        }
+                    }).catch((_) => {
+                        if (this._progressBar) {
+                            $.setText(this._progressBar, this.constructor.lang.uploadFail);
+                            $.addClass(this._progressBar, this.constructor.classes.progressError);
+                        }
+                    }).finally((_) => {
+                        this._endLoading();
+
+                        if (this._progressBar) {
+                            $.setAttribute(this._progressBar, { 'aria-valuenow': 100 });
+                            $.setStyle(this._progressBar, { width: '100%' });
+                        }
+                    });
             });
         }
 
         if (this._cancelButton) {
-            const cancelCallback = this._options.cancelCallback.bind(this);
             $.addEvent(this._cancelButton, 'click.ui.fileinput', (_) => {
                 this._startLoading(this._cancelButton);
 
-                Promise.resolve(cancelCallback()).then((_) => {
-                    if (this._progressBar) {
-                        $.setStyle(this._progressBar, { width: `0%` });
-                    }
-                }).finally((_) => {
-                    this._endLoading();
+                const cancelCallback = this._options.cancelCallback.bind(this);
 
-                    if (this._progress) {
-                        $.detach(this._progress);
-                    }
-                });
+                Promise.resolve(cancelCallback())
+                    .then((_) => {
+                        if (this._progressBar) {
+                            $.setStyle(this._progressBar, { width: `0%` });
+                            $.setAttribute(this._progressBar, { 'aria-valuenow': 0 });
+                            $.removeAttribute(this._uploadButton, 'aria-describedby');
+                        }
+                    })
+                    .catch((_) => { })
+                    .finally((_) => {
+                        this._endLoading();
+
+                        if (this._progress) {
+                            $.detach(this._progress);
+                        }
+                    });
             });
         }
 
         if (this._removeButton) {
-            const removeCallback = this._options.removeCallback.bind(this);
             $.addEvent(this._removeButton, 'click.ui.fileinput', (_) => {
+                if ($.getProperty(this._node, 'files')) {
+                    $.setValue(this._node, '');
+                    $.triggerEvent(this._node, 'change.ui.fileinput');
+                }
+
+                if (this._progress) {
+                    $.detach(this._progress);
+                }
+
+                if (!this._fileList.length || !this._options.removeCallback) {
+                    this._refresh();
+                    return;
+                }
+
                 this._startLoading(this._removeButton);
 
-                Promise.resolve(removeCallback()).then((_) => {
-                    this._fileList = [];
+                const removeCallback = this._options.removeCallback.bind(this);
 
-                    if ($.getProperty(this._node, 'files')) {
-                        $.setValue(this._node, '');
-                        $.triggerEvent(this._node, 'change.ui.fileinput');
-                    }
-                }).finally((_) => {
-                    this._endLoading();
-
-                    if (this._progress) {
-                        $.detach(this._progress);
-                    }
-                });
+                Promise.resolve(removeCallback())
+                    .then((_) => {
+                        this._fileList = [];
+                    })
+                    .catch((_) => { })
+                    .finally((_) => {
+                        this._endLoading();
+                    });
             });
         }
 
@@ -275,6 +262,7 @@
 
             $.removeAttribute(button, 'disabled');
             const content = $.getDataset(button, 'uiContent');
+            $.removeDataset(button, 'uiContent');
             $.setHTML(button, content);
             $.append(this._group, button);
         }
@@ -331,7 +319,7 @@
         }
 
         if (this._removeButton) {
-            if (fileNames) {
+            if (hasFiles || (this._fileList && this._options.removeCallback)) {
                 $.append(this._group, this._removeButton);
             } else {
                 $.detach(this._removeButton);
@@ -428,20 +416,20 @@
             $.append(this._group, formInput);
         }
 
-        if (this._options.showUpload) {
-            this._uploadButton = this.constructor._renderButton(this._options.uploadStyle, 'upload');
+        if (this._options.uploadCallback) {
+            this._uploadButton = this._renderButton(this._options.uploadStyle, 'upload');
         }
 
-        if (this._options.showCancel) {
-            this._cancelButton = this.constructor._renderButton(this._options.cancelStyle, 'cancel');
+        if (this._options.cancelCallback) {
+            this._cancelButton = this._renderButton(this._options.cancelStyle, 'cancel');
         }
 
         if (this._options.showRemove) {
-            this._removeButton = this.constructor._renderButton(this._options.removeStyle, 'remove');
+            this._removeButton = this._renderButton(this._options.removeStyle, 'remove');
         }
 
         if (this._options.showBrowse) {
-            this._browseButton = this.constructor._renderButton(this._options.browseStyle, 'browse');
+            this._browseButton = this._renderButton(this._options.browseStyle, 'browse');
         }
 
         $.append(this._container, this._group);
@@ -455,8 +443,16 @@
                 class: this.constructor.classes.progress,
             });
 
+            const id = ui.generateId('upload-progress');
+
             this._progressBar = $.create('div', {
                 class: this.constructor.classes.progressBar,
+                attributes: {
+                    'id': id,
+                    'role': 'progressbar',
+                    'aria-valuemin': '0',
+                    'aria-valuemax': '100',
+                },
             });
 
             $.append(this._progress, this._progressBar);
@@ -465,6 +461,35 @@
         $.setAttribute(this._node, { tabindex: -1 });
         $.addClass(this._node, this.constructor.classes.hide);
         $.before(this._node, this._container);
+    }
+    /**
+     * Render a button.
+     * @param {string} style The button style.
+     * @param {string} key The button key.
+     * @return {HTMLElement} The button.
+     */
+    function _renderButton(style, key) {
+        const button = $.create('button', {
+            class: [this.constructor.classes.btn, `btn-${style}`],
+            attributes: {
+                type: 'button',
+            },
+        });
+
+        const icon = $.create('div', {
+            html: this.constructor.icons[key],
+        });
+
+        if (this._options.buttonText) {
+            $.setText(button, this.constructor.lang[key]);
+            $.addClass(icon, this.constructor.classes.iconText);
+        } else {
+            $.setAttribute(button, { 'aria-label': this.constructor.lang[key] });
+        }
+
+        $.prepend(button, icon);
+
+        return button;
     }
 
     // FileInput default options
@@ -480,10 +505,9 @@
         cancelStyle: 'danger',
         multiSeparator: ', ',
         showBrowse: true,
-        showUpload: true,
-        showCancel: true,
         showRemove: true,
         showProgress: true,
+        buttonText: false,
     };
 
     // FileInput classes
@@ -493,7 +517,7 @@
         fileNames: 'align-middle ms-2',
         formInput: 'form-input',
         hide: 'visually-hidden',
-        icon: 'd-inline-block me-1',
+        iconText: 'd-inline-block me-1',
         inputFilled: 'input-filled',
         inputOutline: 'input-outline',
         inputGroup: 'input-group',
@@ -535,6 +559,7 @@
     proto._refresh = _refresh;
     proto._refreshDisabled = _refreshDisabled;
     proto._render = _render;
+    proto._renderButton = _renderButton;
     proto._startLoading = _startLoading;
 
     // FileInput init

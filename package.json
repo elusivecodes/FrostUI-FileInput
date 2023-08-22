@@ -1,6 +1,6 @@
 {
     "name": "@fr0st/ui-fileinput",
-    "version": "2.0.2",
+    "version": "3.0.0",
     "description": "FrostUI-FileInput is a free, open-source File Input component for Javascript.",
     "keywords": [
         "ui",
@@ -39,10 +39,10 @@
     "license": "MIT",
     "private": false,
     "devDependencies": {
-        "@rollup/plugin-node-resolve": "^15.0.2",
-        "eslint": "^8.41.0",
+        "@rollup/plugin-node-resolve": "^15.2.1",
+        "eslint": "^8.47.0",
         "eslint-config-google": "^0.14.0",
-        "rollup": "^3.23.0",
-        "terser": "^5.17.6"
+        "rollup": "^3.28.1",
+        "terser": "^5.19.2"
     }
 }

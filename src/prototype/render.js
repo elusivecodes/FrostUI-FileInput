@@ -1,4 +1,5 @@
 import $ from '@fr0st/query';
+import { generateId } from '@fr0st/ui';
 
 /**
  * Render the file input.
@@ -44,20 +45,20 @@ export function _render() {
         $.append(this._group, formInput);
     }
 
-    if (this._options.showUpload) {
-        this._uploadButton = this.constructor._renderButton(this._options.uploadStyle, 'upload');
+    if (this._options.uploadCallback) {
+        this._uploadButton = this._renderButton(this._options.uploadStyle, 'upload');
     }
 
-    if (this._options.showCancel) {
-        this._cancelButton = this.constructor._renderButton(this._options.cancelStyle, 'cancel');
+    if (this._options.cancelCallback) {
+        this._cancelButton = this._renderButton(this._options.cancelStyle, 'cancel');
     }
 
     if (this._options.showRemove) {
-        this._removeButton = this.constructor._renderButton(this._options.removeStyle, 'remove');
+        this._removeButton = this._renderButton(this._options.removeStyle, 'remove');
     }
 
     if (this._options.showBrowse) {
-        this._browseButton = this.constructor._renderButton(this._options.browseStyle, 'browse');
+        this._browseButton = this._renderButton(this._options.browseStyle, 'browse');
     }
 
     $.append(this._container, this._group);
@@ -71,8 +72,16 @@ export function _render() {
             class: this.constructor.classes.progress,
         });
 
+        const id = generateId('upload-progress');
+
         this._progressBar = $.create('div', {
             class: this.constructor.classes.progressBar,
+            attributes: {
+                'id': id,
+                'role': 'progressbar',
+                'aria-valuemin': '0',
+                'aria-valuemax': '100',
+            },
         });
 
         $.append(this._progress, this._progressBar);
@@ -81,4 +90,34 @@ export function _render() {
     $.setAttribute(this._node, { tabindex: -1 });
     $.addClass(this._node, this.constructor.classes.hide);
     $.before(this._node, this._container);
+};
+
+/**
+ * Render a button.
+ * @param {string} style The button style.
+ * @param {string} key The button key.
+ * @return {HTMLElement} The button.
+ */
+export function _renderButton(style, key) {
+    const button = $.create('button', {
+        class: [this.constructor.classes.btn, `btn-${style}`],
+        attributes: {
+            type: 'button',
+        },
+    });
+
+    const icon = $.create('div', {
+        html: this.constructor.icons[key],
+    });
+
+    if (this._options.buttonText) {
+        $.setText(button, this.constructor.lang[key]);
+        $.addClass(icon, this.constructor.classes.iconText);
+    } else {
+        $.setAttribute(button, { 'aria-label': this.constructor.lang[key] });
+    }
+
+    $.prepend(button, icon);
+
+    return button;
 };
